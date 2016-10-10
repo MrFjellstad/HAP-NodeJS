@@ -3,16 +3,39 @@ var Service = require('../').Service;
 var Characteristic = require('../').Characteristic;
 var uuid = require('../').uuid;
 
+
+
+var mqtt = require('mqtt');
+var client  = mqtt.connect('mqtt://127.0.0.1');
+ 
+client.on('connect', function () {
+  client.subscribe('presence');
+  client.publish('presence', 'Hello mqtt');
+  client.subscribe('garasje/temp');
+  console.log('connect');
+});
+ 
+client.on('message', function (topic, message) {
+  // message is Buffer 
+  console.log(topic + ' - ' + message);
+  FAKE_SENSOR.currentTemperature = parseFloat(message);
+//  client.end();
+});
+
+
+
+
 // here's a fake temperature sensor device that we'll expose to HomeKit
 var FAKE_SENSOR = {
-  currentTemperature: 50,
+  currentTemperature: 0,
   getTemperature: function() { 
     console.log("Getting the current temperature!");
     return FAKE_SENSOR.currentTemperature;
   },
   randomizeTemperature: function() {
     // randomize temperature to a value between 0 and 100
-    FAKE_SENSOR.currentTemperature = Math.round(Math.random() * 100);
+    // FAKE_SENSOR.currentTemperature = Math.round(Math.random() * 100);
+    // console.log(FAKE_SENSOR.currentTemperature);
   }
 }
 
